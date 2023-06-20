@@ -1,0 +1,10 @@
+/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/edit_cache.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/package_source.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/rebuild_cache.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/package.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/docker.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/cgroup/CMakeFiles/edit_cache.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/cgroup/CMakeFiles/package_source.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/cgroup/CMakeFiles/rebuild_cache.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/cgroup/CMakeFiles/package.dir
+/home/saltyfish/桌面/docker/docker_reset/Debug/cgroup/CMakeFiles/cgroup.dir

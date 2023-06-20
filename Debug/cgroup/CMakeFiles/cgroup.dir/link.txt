@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcgroup.a  CMakeFiles/cgroup.dir/docker_limit.cpp.o CMakeFiles/cgroup.dir/resource_config.cpp.o CMakeFiles/cgroup.dir/subsystem.cpp.o
+/usr/bin/ranlib libcgroup.a

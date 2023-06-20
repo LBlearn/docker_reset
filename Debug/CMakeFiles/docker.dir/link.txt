@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/docker.dir/command_set.cpp.o CMakeFiles/docker.dir/docker.cpp.o CMakeFiles/docker.dir/error.cpp.o CMakeFiles/docker.dir/main.cpp.o CMakeFiles/docker.dir/utility.cpp.o  -o docker  cgroup/libcgroup.a -lstdc++fs 
