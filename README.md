@@ -15,3 +15,21 @@
   - -t：打包成tar包
   - --name、-n：指定打包镜像的名字
 + containers命令：查看现存的容器
+
+运行实例：
+1. 进行终端化容器easyOS（目录中的一个轻量级linux系统），同时进行资源限制、容器卷挂载
+```shell
+sudo ./docker run -it --memory=100m --cpuset 1 --cpushare 512 -v /test:/tmp/test easyOS /bin/bash
+```
+2. 查看现有容器
+```shell
+sudo ./docker containers
+```
+3. 查看现有镜像
+```shell
+sudo ./docker images
+```
+4. 将容器打包成tar镜像并指定名字
+```shell
+sudo ./docker commit --name=test.tar -t Container_id
+```
