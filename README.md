@@ -7,7 +7,7 @@
   - --memory、-m：实现内存限制
   - --cpuset、-c：实现cpu限制
   - --cpushare、-C：实现cpushare限制
-  - 注：run中实现了namespace和cgroup机制，并通过pivot_root系统调用、AUFS系统挂载将容器的运行从镜像未知转移到dockerHome的aufs目录，每一个容器都会在aufs下新建一个目录，目录下的mnt为挂载目录，即容器
+  - 注：run中实现了namespace和cgroup机制，并通过pivot_root系统调用、AUFS系统挂载将容器的运行从镜像位置转移到dockerHome的aufs目录，每一个容器都会在aufs下新建一个目录，目录下的mnt为挂载目录，即容器
   的运行时根目录，write_layer是进行改变时写的目录（AUFS机制） 
 + images命令：查看现存的镜像
   - 注：镜像都放在dockerHome/image目录下，tar_image存放的是tar镜像
