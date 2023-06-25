@@ -7,6 +7,7 @@ CMakeFiles/docker.dir/command_set.cpp.o: ../cgroup/subsystem.hpp
 CMakeFiles/docker.dir/command_set.cpp.o: ../include/command_set.hpp
 CMakeFiles/docker.dir/command_set.cpp.o: ../include/error.hpp
 CMakeFiles/docker.dir/command_set.cpp.o: ../include/option_namespace.hpp
+CMakeFiles/docker.dir/command_set.cpp.o: ../include/saving.hpp
 CMakeFiles/docker.dir/command_set.cpp.o: ../include/utility.hpp
 CMakeFiles/docker.dir/command_set.cpp.o: ../command_set.cpp
 
@@ -17,6 +18,7 @@ CMakeFiles/docker.dir/docker.cpp.o: ../include/command_set.hpp
 CMakeFiles/docker.dir/docker.cpp.o: ../include/docker.hpp
 CMakeFiles/docker.dir/docker.cpp.o: ../include/error.hpp
 CMakeFiles/docker.dir/docker.cpp.o: ../include/option_namespace.hpp
+CMakeFiles/docker.dir/docker.cpp.o: ../include/saving.hpp
 CMakeFiles/docker.dir/docker.cpp.o: ../include/utility.hpp
 CMakeFiles/docker.dir/docker.cpp.o: ../docker.cpp
 
@@ -30,8 +32,15 @@ CMakeFiles/docker.dir/main.cpp.o: ../include/command_set.hpp
 CMakeFiles/docker.dir/main.cpp.o: ../include/docker.hpp
 CMakeFiles/docker.dir/main.cpp.o: ../include/error.hpp
 CMakeFiles/docker.dir/main.cpp.o: ../include/option_namespace.hpp
+CMakeFiles/docker.dir/main.cpp.o: ../include/saving.hpp
 CMakeFiles/docker.dir/main.cpp.o: ../include/utility.hpp
 CMakeFiles/docker.dir/main.cpp.o: ../main.cpp
+
+CMakeFiles/docker.dir/saving.cpp.o: ../include/error.hpp
+CMakeFiles/docker.dir/saving.cpp.o: ../include/option_namespace.hpp
+CMakeFiles/docker.dir/saving.cpp.o: ../include/saving.hpp
+CMakeFiles/docker.dir/saving.cpp.o: ../include/utility.hpp
+CMakeFiles/docker.dir/saving.cpp.o: ../saving.cpp
 
 CMakeFiles/docker.dir/utility.cpp.o: ../include/error.hpp
 CMakeFiles/docker.dir/utility.cpp.o: ../include/option_namespace.hpp

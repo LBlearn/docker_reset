@@ -6,7 +6,7 @@
 #include<getopt.h>
 
 namespace CommandType{
-    static std::vector<std::string> commands_options{"run","images","containers","commit","--help"}; 
+    static std::vector<std::string> commands_options{"run","images","containers","commit","--help","stop","kill","exec"}; 
 };
 
 namespace RunCommandPara{

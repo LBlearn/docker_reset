@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/saltyfish/桌面/docker/docker_reset/docker.cpp" "/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/docker.dir/docker.cpp.o"
   "/home/saltyfish/桌面/docker/docker_reset/error.cpp" "/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/docker.dir/error.cpp.o"
   "/home/saltyfish/桌面/docker/docker_reset/main.cpp" "/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/docker.dir/main.cpp.o"
+  "/home/saltyfish/桌面/docker/docker_reset/saving.cpp" "/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/docker.dir/saving.cpp.o"
   "/home/saltyfish/桌面/docker/docker_reset/utility.cpp" "/home/saltyfish/桌面/docker/docker_reset/Debug/CMakeFiles/docker.dir/utility.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

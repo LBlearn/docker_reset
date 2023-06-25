@@ -510,9 +510,16 @@ int runClone(void *args){
     if(source->short_opt_map.find('t') != source->short_opt_map.end()){
         start_bash(source->bash_name);
     }
+
+    if(source->short_opt_map.find('d') != source->short_opt_map.end()){
+    //要后台运行的话加一个死循环
+        setsid();
+        while(1) ;
+            sleep(1);    
+    }
 }
 
-void RunCommand::run_image(const string& container_id){
+void RunCommand::run_image(const string& container_id,const string& command){
     // print_message();
     
     static const int STACK_SIZE= (1024 * 1024);
@@ -536,6 +543,7 @@ void RunCommand::run_image(const string& container_id){
     //调转到aufs下的容器目录
     new_work_place(container_id);
 
+
     pid_t childPid = clone(runClone, stackTop,
                 CLONE_NEWIPC|
                 CLONE_NEWNS |
@@ -544,7 +552,14 @@ void RunCommand::run_image(const string& container_id){
                 CLONE_NEWNET|
                 SIGCHLD,
                 source);
-    
+
+    //元数据的操作
+    string status = (short_opt_map.find('t') != short_opt_map.end() ? "TR" : "R");
+    ContainerDataMessage container(*image_name_ptr,get_time_now(),*image_name_ptr+container_id,command,status,childPid);
+    container.write_metedata();
+    // container.get_metedata().print_container_head();
+    // container.print_metedate();
+
     vector<string> limit_v;
 
     init_limit_v(limit_v);
@@ -555,14 +570,21 @@ void RunCommand::run_image(const string& container_id){
     DockerLimit docker_limit(limit_v[0],limit_v[1],limit_v[2]);
     docker_limit.limit(childPid,*image_name_ptr+container_id);
 
-    waitpid(childPid,nullptr,0);
-    if(childPid){
-        cout << childPid<<endl;
-        docker_limit.release();
-        if(short_opt_map.find('v') != short_opt_map.end()){
-            unmoumt_volume(short_opt_map['v'],*image_name_ptr+container_id);
+
+
+    if(short_opt_map.find('t') != short_opt_map.end()){
+        waitpid(childPid,nullptr,0);
+        if(childPid){
+            //这是父进程进行的操作
+            string data_path = CONTAINER_METEDATA_PATH + *image_name_ptr+container_id+".txt";
+            // std::cout<<data_path<<endl;
+            delete_file(data_path.c_str());
+            docker_limit.release();
+            if(short_opt_map.find('v') != short_opt_map.end()){
+                unmoumt_volume(short_opt_map['v'],*image_name_ptr+container_id);
+            }
+            delete_work_place(container_id);
         }
-        delete_work_place(container_id);
     }
 }
 
@@ -575,7 +597,10 @@ void RunCommand::run(int argc,char **argv,const string& container_id){
         help();
     }
     else{
-        run_image(container_id);
+        string command;
+        for(int i = 0;i < argc;++i)
+            (command += argv[i]) += " ";
+        run_image(container_id,command);
     }
 }  
 
@@ -594,13 +619,13 @@ RunCommand::~RunCommand(){
 
 //ContainersCommand SubFunc
 void print_container_message(){
-    string container_path = "../dockerHome/aufs/";
+    string container_path = "../dockerHome/metedata/container/";
     auto all_files = get_dir_all(container_path.c_str());
-    ContainerMessage::print_head();
+    ContainerMeteData::print_container_head();
     for(auto& val:all_files){
-        auto temp = container_path + val;
-        ContainerMessage message(container_path,val);
-        message.print_messages();
+        auto temp_path = container_path + val;
+        ContainerDataMessage messages(temp_path);
+        messages.print_metedate();
     }
 }
 
@@ -853,35 +878,3 @@ void ImageMessage::print_messages(){
 }
 
 //end ImageMessage Func
-
-/*
-    ContainerMessage Func
-*/
-string get_image_name(const string& container_id){
-    string image_name;
-    for(auto val:container_id){
-        if(val == '_')
-            break;
-        image_name.push_back(val);
-    }
-    return image_name;
-}
-
-ContainerMessage::ContainerMessage(const string& image_path,const string& image_name){
-    this->container_id = image_name;
-    this->image_name = get_image_name(this->container_id);
-    this->create_time =get_dir_time((image_path+image_name).c_str());
-}
-
-void ContainerMessage::print_messages(){
-    cout<<std::left<<setw(20)<<container_id
-        <<std::left<<setw(15)<<image_name
-        <<std::left<<setw(30)<<create_time<<endl;
-}
-
-void ContainerMessage::print_head()
-{
-    cout<<std::left<<setw(20)<<"CONTAINER_ID"
-        <<std::left<<setw(15)<<"IMAGE_NAME"
-        <<std::left<<setw(30)<<"CREATED_TIME"<<endl;
-}

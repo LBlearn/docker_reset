@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <iomanip>
+#include<unistd.h>
 
 #include"option_namespace.hpp"
 #include"error.hpp"
@@ -43,4 +44,13 @@ string get_dir_time(const char *dir);
 
 //获取指定文件夹下的所有文件名
 std::vector<string> get_dir_all(const char *dir);
+
+//获取当前时间的字符串
+string get_time_now();
+
+//删除文件
+string delete_file(const string& path);
+
+//分割字符串
+std::vector<string> split(const string& s, char spliter);
 #endif

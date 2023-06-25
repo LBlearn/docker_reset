@@ -266,6 +266,33 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/docker.dir/build.make CMakeFiles/docker.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+saving.o: saving.cpp.o
+
+.PHONY : saving.o
+
+# target to build an object file
+saving.cpp.o:
+	$(MAKE) -f CMakeFiles/docker.dir/build.make CMakeFiles/docker.dir/saving.cpp.o
+.PHONY : saving.cpp.o
+
+saving.i: saving.cpp.i
+
+.PHONY : saving.i
+
+# target to preprocess a source file
+saving.cpp.i:
+	$(MAKE) -f CMakeFiles/docker.dir/build.make CMakeFiles/docker.dir/saving.cpp.i
+.PHONY : saving.cpp.i
+
+saving.s: saving.cpp.s
+
+.PHONY : saving.s
+
+# target to generate assembly for a file
+saving.cpp.s:
+	$(MAKE) -f CMakeFiles/docker.dir/build.make CMakeFiles/docker.dir/saving.cpp.s
+.PHONY : saving.cpp.s
+
 utility.o: utility.cpp.o
 
 .PHONY : utility.o
@@ -317,6 +344,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... saving.o"
+	@echo "... saving.i"
+	@echo "... saving.s"
 	@echo "... utility.o"
 	@echo "... utility.i"
 	@echo "... utility.s"

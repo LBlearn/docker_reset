@@ -19,6 +19,7 @@
 #include"utility.hpp"
 #include"option_namespace.hpp"
 #include"docker_limit.hpp"
+#include"saving.hpp"
 using namespace std;
 
 namespace fs = std::experimental::filesystem;
@@ -105,7 +106,7 @@ private:
     //删除AUFS挂载部分
     void delete_work_place(const string& container_id);
 
-    void run_image(const string& container_id);
+    void run_image(const string& container_id,const string& command);
 public:
     RunCommand();
     RunCommand(const string& short_opt,
@@ -127,20 +128,6 @@ public:
     void print_messages();
     static void print_head();
     ~ImageMessage() = default;
-};
-
-class ContainerMessage{
-private:
-    string container_id;
-    string image_name;
-    string create_time;
-
-public:
-    ContainerMessage() = default;
-    ContainerMessage(const string& image_path,const string& image_name);
-    void print_messages();
-    static void print_head();
-    ~ContainerMessage() = default;
 };
 
 class ContainersCommand:public CommandInterface{
@@ -176,4 +163,19 @@ public:
     ~CommitCommand();
 };
 
+class StopContainer:public CommandInterface{
+
+};
+
+class StartContainer:public CommandInterface{
+    
+};
+
+class ExecContainer:public CommandInterface{
+
+};
+
+class KillContainer:public CommandInterface{
+
+};
 #endif

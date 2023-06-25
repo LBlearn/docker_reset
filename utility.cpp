@@ -164,3 +164,36 @@ string get_file_size(const char* fname)
     size_str += units;
     return size_str;
 }
+
+
+string get_time_now()
+{
+    time_t timep;
+    time (&timep);
+    char tmp[64];
+    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S",localtime(&timep));
+    return tmp;
+}
+
+string delete_file(const string& path){
+    if(unlink(path.c_str()) != 0){
+            print_error(__func__,RMDIR_ERROR);
+        }
+}
+
+//分离metedate
+std::vector<string> split(const string& s, char spliter){
+    string tmp;
+    std::vector<string> ans;
+    for(int i = 0; i < s.size();i++){
+        if(s[i]!=spliter) {
+            tmp.push_back(s[i]);
+        }
+        else {
+            ans.push_back(tmp);
+            tmp = string();
+        }
+    }
+    if(s[s.size()-1]!= spliter) ans.push_back(tmp);
+    return ans;
+}
