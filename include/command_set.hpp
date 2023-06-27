@@ -164,18 +164,43 @@ public:
 };
 
 class StopContainer:public CommandInterface{
-
+private:    
+    inline void help();
+    void get_option(int argc,char **argv);
+public:
+    StopContainer();
+    void run(int argc,char **argv,const string& container_id);
+    ~StopContainer();
 };
 
 class StartContainer:public CommandInterface{
-    
+private:    
+    inline void help();
+    void get_option(int argc,char **argv);
+public:
+    StartContainer();
+    void run(int argc,char **argv,const string& container_id);
+    ~StartContainer();
 };
 
 class ExecContainer:public CommandInterface{
-
+private:    
+    inline void help();
+    void get_option(int argc,char **argv);
+public:
+    ExecContainer();
+    void run(int argc,char **argv,const string& container_id);
+    ~ExecContainer();
 };
 
 class KillContainer:public CommandInterface{
-
+private:    
+    inline void help();
+    void get_option(int argc,char **argv);
+public:
+    KillContainer();
+    void run(int argc,char **argv,const string& container_id);
+    ~KillContainer();
 };
+
 #endif

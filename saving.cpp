@@ -27,11 +27,23 @@ string ContainerMeteData::get_container_metedata_string()
             + "|" + command + "|" + status + "|" + to_string(container_pid);
 }
 
+void ContainerMeteData::change_status(const string& new_status){
+    status = new_status;
+}
+
+pid_t ContainerMeteData::get_pid(){
+    return container_pid;
+}
+
 ContainerMeteData::ContainerMeteData(const string& image_name,const string& create_time,
                      const string& container_id,const string& command,
                      const string& status,pid_t container_pid)
     :image_name(image_name),create_time(create_time),container_id(container_id),command(command),status(status),container_pid(container_pid)
 {
+}
+
+string ContainerMeteData::get_image_name(){
+    return image_name;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -55,6 +67,7 @@ ContainerDataMessage::ContainerDataMessage(const string& path){
         if(tmp.size() != 6) 
             print_error(__func__,"CONTAINER_METEDATA_ERROR");
         container_message = ContainerMeteData(tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],stoi(tmp[5]));
+        container_id = tmp[2];
     }
 }
 
@@ -65,8 +78,8 @@ ContainerDataMessage::~ContainerDataMessage(){
 void ContainerDataMessage::write_metedata(){
     std::ofstream ofs;
     string path = CONTAINER_METEDATA_PATH+this->container_id + ".txt"; 
-    cout<<path<<endl;
-    ofs.open(path.c_str(),ios_base::app|ios_base::out);
+    // cout<<path<<endl;
+    ofs.open(path.c_str(),ios_base::trunc|ios_base::out);
     if(!ofs.is_open()){
         print_error(__func__,"OPEN_FILE_ERROR");
     }
@@ -78,6 +91,18 @@ void ContainerDataMessage::print_metedate(){
     container_message.print_container_message();
 };
 
-ContainerMeteData ContainerDataMessage::get_metedata(){
-    return this->container_message;
+void ContainerDataMessage::change_status(const string& new_status){
+    this->container_message.change_status(new_status);
+}
+
+pid_t ContainerDataMessage::get_pid(){
+    return container_message.get_pid();
+}
+
+string ContainerDataMessage::get_container_id(){
+    return container_id;
+}
+
+string ContainerDataMessage::get_image_name(){
+    return container_message.get_image_name();
 }

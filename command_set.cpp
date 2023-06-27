@@ -54,6 +54,10 @@ inline void CommandInterface::help(){
     cout<<"\tcommit          save the container to image"<<endl;
     cout<<"\tcontainers      check the messages of the contaniers now"<<endl;
     cout<<"\timages          check the messages of the images now"<<endl;
+    cout<<"\tstop            stop the detach container"<<endl;
+    cout<<"\tstart           start the stopped container"<<endl;
+    cout<<"\texec            start a shell for the container"<<endl;
+    cout<<"\tkill            end the container of the container_id"<<endl;
 }
 
 CommandInterface::CommandInterface(char *short_opt,option *long_opt){
@@ -192,8 +196,6 @@ void RunCommand::print_message(){
     }
 }
 
-
-
 //AUFS文件系统的创建子函数
 namespace aufs_sub_func{
     const static string AUFS_PATH = "../dockerHome/aufs/";
@@ -276,7 +278,6 @@ namespace aufs_sub_func{
     }
 }
 
-
 //run命令的子函数
 namespace run_sub_func{
     //shell和t进行绑定
@@ -289,10 +290,10 @@ namespace run_sub_func{
         delete []c_shell;
     }
 
-    //切换root文件系统到镜像目录
+    //切换root文件系统到mnt目录
     void set_rootdir(const string& image_name){
         // cout<<get_current_dir_name()<<endl;
-        string path =get_image_path(image_name);
+        string path = aufs_sub_func::get_real_root(image_name);
 
         //判断镜像是否存在，当镜像不存在时结束进程，打印错误信息
         if(access(path.c_str(),F_OK) == -1)
@@ -304,9 +305,11 @@ namespace run_sub_func{
     }
 
     //用pivot_root系统调用切换root文件系统
-    void pivot_root(string& image_name,const string& image_id){
+    void pivot_root(const string& image_name,const string& image_id){
 
         string new_root = aufs_sub_func::get_real_root(image_name+image_id);
+
+        // cout<<new_root<<endl;
 
         if(mount("/", "/", "", MS_PRIVATE|MS_REC,"") != 0)
             print_error(__func__,MOUNT_ERROR);
@@ -344,9 +347,10 @@ namespace run_sub_func{
             print_error(__func__,MOUNT_ERROR);
     }
 
-    void pivot_root(string& image_name){
+    void pivot_root(const string& image_name){
 
-        string new_root = get_image_path(image_name);
+        string new_root = aufs_sub_func::get_real_root(image_name);
+        // cout<<new_root<<endl;
 
         if(mount("/", "/", "", MS_PRIVATE|MS_REC,"") != 0)
             print_error(__func__,MOUNT_ERROR);
@@ -392,7 +396,6 @@ namespace run_sub_func{
         mount("none","/sys","sys",0,nullptr);
     }
 }
-
 
 //数据卷相关子函数
 static const int HOME_INDEX = 0;
@@ -465,7 +468,6 @@ void unmoumt_volume(const string& volume,const string& container_ID){
 }
 //end volume
 
-
 void RunCommand::new_work_place(const string& container_id){
     // aufs_sub_func::create_read_only_layer(*image_name_ptr,container_id);
     aufs_sub_func::create_write_layer(*image_name_ptr,container_id);
@@ -504,10 +506,11 @@ int runClone(void *args){
 
     // set_rootdir(source->image_name);
     // pivot_root(source->image_name);
-    pivot_root(source->image_name,source->image_id);
-    mount_proc();
-    //有-t选项才绑定shell
+
+    //有-t选项才绑定shell，并改变pivot_root
     if(source->short_opt_map.find('t') != source->short_opt_map.end()){
+        pivot_root(source->image_name,source->image_id);
+        mount_proc();
         start_bash(source->bash_name);
     }
 
@@ -577,12 +580,17 @@ void RunCommand::run_image(const string& container_id,const string& command){
         if(childPid){
             //这是父进程进行的操作
             string data_path = CONTAINER_METEDATA_PATH + *image_name_ptr+container_id+".txt";
+            
             // std::cout<<data_path<<endl;
+            
             delete_file(data_path.c_str());
             docker_limit.release();
             if(short_opt_map.find('v') != short_opt_map.end()){
                 unmoumt_volume(short_opt_map['v'],*image_name_ptr+container_id);
             }
+
+        // cout<<container_id<<endl;
+
             delete_work_place(container_id);
         }
     }
@@ -651,7 +659,7 @@ void ContainersCommand::get_option(int argc,char **argv){
     // cout<<"func = "<<__func__<<endl;
     int ch;
     int index;
-    while((ch = getopt_long(argc,argv,RunCommandPara::short_opt_def,RunCommandPara::long_opt_def,&index)) != -1){
+    while((ch = getopt_long(argc,argv,ContainersCommandPara::short_opt_def,ContainersCommandPara::long_opt_def,&index)) != -1){
         // cout<<(char)ch<<endl;
         switch (ch){
             case 'h':
@@ -878,3 +886,308 @@ void ImageMessage::print_messages(){
 }
 
 //end ImageMessage Func
+
+/*
+    Stop Func
+*/
+inline void StopContainer::help(){
+    cout<<"Format:\n"
+        <<"\tdocker stop [-opt] container_id"<<endl;
+    cout<<"Containters Options:"<<endl;
+    cout<<"\t-h,--help               Print the message"<<endl;
+    cout<<"\t-t.--test               Use to test the function"<<endl;
+    exit(0);
+}
+    
+void StopContainer::get_option(int argc,char **argv){
+    int ch;
+    int index;
+    while((ch = getopt_long(argc,argv,StopCommandPara::short_opt_def,StopCommandPara::long_opt_def,&index)) != -1){
+        // cout<<(char)ch<<endl;
+        switch (ch){
+            case 'h':
+                help();
+                break;
+            case 't':
+                cout<<"test successful"<<endl;
+                break;
+            default:
+                print_error(__func__,OPTION_NOT_EXIST);
+                break;
+        }
+    }
+
+}
+    
+StopContainer::StopContainer():CommandInterface(
+    StopCommandPara::stl_short_opt_def,
+    StopCommandPara::stl_long_opt_def){
+}
+
+void StopContainer::run(int argc,char **argv,const string& container_id){
+    get_option(argc,argv);
+    
+    string id_para = argv[argc-1];
+
+    string path = "../dockerHome/metedata/container/" + id_para + ".txt";
+
+    // cout<<path<<endl;
+
+    if(access(path.c_str(),F_OK) != 0)
+        print_error(__func__,"CONTAINER_NOT_EXSIT");
+
+    ContainerDataMessage messages(path);
+    pid_t container_pid = messages.get_pid();
+    
+    cout<<container_pid<<endl;
+
+    kill(container_pid,SIGSTOP);
+
+    messages.change_status("S");
+
+    // messages.print_metedate();
+
+    messages.write_metedata();
+}
+
+StopContainer::~StopContainer(){
+
+}
+
+//end stop command
+
+/*
+    start command
+*/
+
+
+inline void StartContainer::help(){
+    cout<<"Format:\n"
+        <<"\tdocker start [-opt] container_id"<<endl;
+    cout<<"Containters Options:"<<endl;
+    cout<<"\t-h,--help               Print the message"<<endl;
+    cout<<"\t-t.--test               Use to test the function"<<endl;
+    exit(0);
+}
+
+void StartContainer::get_option(int argc,char **argv){
+    int ch;
+    int index;
+    while((ch = getopt_long(argc,argv,StartCommandPara::short_opt_def,StartCommandPara::long_opt_def,&index)) != -1){
+        // cout<<(char)ch<<endl;
+        switch (ch){
+            case 'h':
+                help();
+                break;
+            case 't':
+                cout<<"test successful"<<endl;
+                break;
+            default:
+                print_error(__func__,OPTION_NOT_EXIST);
+                break;
+        }
+    }
+}
+
+StartContainer::StartContainer():CommandInterface(
+    StartCommandPara::stl_short_opt_def,
+    StartCommandPara::stl_long_opt_def){
+}
+
+void StartContainer::run(int argc,char **argv,const string& container_id){
+    get_option(argc,argv);
+    
+    string id_para = argv[argc-1];
+
+    string path = "../dockerHome/metedata/container/" + id_para + ".txt";
+
+    // cout<<path<<endl;
+
+    if(access(path.c_str(),F_OK) != 0)
+        print_error(__func__,"CONTAINER_NOT_EXSIT");
+
+    ContainerDataMessage messages(path);
+    pid_t container_pid = messages.get_pid();
+    
+    cout<<container_pid<<endl;
+
+    kill(container_pid,SIGCONT);
+
+    messages.change_status("R");
+
+    // messages.print_metedate();
+
+    messages.write_metedata();
+}
+
+StartContainer::~StartContainer(){
+    
+}
+
+/*
+    exec command
+*/
+
+inline void ExecContainer::help(){
+    cout<<"Format:\n"
+        <<"\tdocker exec [-opt] container_id shell_name"<<endl;
+    cout<<"Containters Options:"<<endl;
+    cout<<"\t-h,--help               Print the message"<<endl;
+    cout<<"\t-t.--test               Use to test the function"<<endl;
+    exit(0);
+}
+
+void ExecContainer::get_option(int argc,char **argv){
+    int ch;
+    int index;
+    while((ch = getopt_long(argc,argv,ExecCommandPara::short_opt_def,ExecCommandPara::long_opt_def,&index)) != -1){
+        // cout<<(char)ch<<endl;
+        switch (ch){
+            case 'h':
+                help();
+                break;
+            case 't':
+                cout<<"test successful"<<endl;
+                break;
+            default:
+                print_error(__func__,OPTION_NOT_EXIST);
+                break;
+        }
+    }
+}
+
+ExecContainer::ExecContainer():CommandInterface(
+    ExecCommandPara::stl_short_opt_def,
+    ExecCommandPara::stl_long_opt_def){
+}
+
+void ExecContainer::run(int argc,char **argv,const string& container_id){
+    get_option(argc,argv);
+    
+    string id_para = argv[argc-2];
+
+    string path = "../dockerHome/metedata/container/" + id_para + ".txt";
+
+    // cout<<path<<endl;
+
+    if(access(path.c_str(),F_OK) != 0)
+        print_error(__func__,"CONTAINER_NOT_EXSIT");
+
+    ContainerDataMessage messages(path);
+    pid_t container_pid = messages.get_pid();
+    
+    cout<<container_pid<<endl;
+
+    kill(container_pid,SIGCONT);
+
+    messages.change_status("RT");
+
+    // messages.print_metedate();
+
+    messages.write_metedata();
+
+    //启动终端部分，改改再
+
+    string temp_shell = argv[argc-1];
+    run_sub_func::set_rootdir(messages.get_container_id());
+    run_sub_func::mount_proc();
+    run_sub_func::start_bash(temp_shell);
+}
+ExecContainer::~ExecContainer(){
+    
+}
+
+//end exec command
+
+/*
+    kill command
+*/
+
+inline void KillContainer::help(){
+    cout<<"Format:\n"
+        <<"\tdocker kill [-opt] container_id"<<endl;
+    cout<<"Containters Options:"<<endl;
+    cout<<"\t-h,--help               Print the message"<<endl;
+    cout<<"\t-t.--test               Use to test the function"<<endl;
+    exit(0);
+}
+
+void KillContainer::get_option(int argc,char **argv){
+    int ch;
+    int index;
+    while((ch = getopt_long(argc,argv,KillCommandPara::short_opt_def,KillCommandPara::long_opt_def,&index)) != -1){
+        // cout<<(char)ch<<endl;
+        switch (ch){
+            case 'h':
+                help();
+                break;
+            case 't':
+                cout<<"test successful"<<endl;
+                break;
+            default:
+                print_error(__func__,OPTION_NOT_EXIST);
+                break;
+        }
+    }
+}
+
+KillContainer::KillContainer():CommandInterface(
+    KillCommandPara::stl_short_opt_def,
+    KillCommandPara::stl_long_opt_def){
+}
+
+void KillContainer::run(int argc,char **argv,const string& container_id){
+    get_option(argc,argv);
+    
+    string id_para = argv[argc-1];
+
+    string path = "../dockerHome/metedata/container/" + id_para + ".txt";
+
+    // cout<<path<<endl;
+
+    if(access(path.c_str(),F_OK) != 0)
+        print_error(__func__,"CONTAINER_NOT_EXSIT");
+
+    ContainerDataMessage messages(path);
+    pid_t container_pid = messages.get_pid();
+    
+    cout<<container_pid<<endl;
+
+    kill(container_pid,SIGKILL);
+
+    /*
+        添加删除一堆目录的操作
+    */
+
+//  vector<string> limit_v;
+
+//  init_limit_v(limit_v);
+
+//  for(auto val:limit_v)
+//  cout<<val<<endl;
+
+//  DockerLimit docker_limit(limit_v[0],limit_v[1],limit_v[2]);
+//  docker_limit.limit(childPid,*image_name_ptr+container_id);
+
+    string data_path = CONTAINER_METEDATA_PATH + messages.get_container_id() +".txt";
+            
+//  std::cout<<data_path<<endl;
+            
+    delete_file(data_path.c_str());
+            
+//  docker_limit.release();
+    
+    if(short_opt_map.find('v') != short_opt_map.end()){
+        unmoumt_volume(short_opt_map['v'],messages.get_container_id());
+    }
+
+    aufs_sub_func::unmount_aufs(messages.get_container_id());
+    aufs_sub_func::rm_write_dir(messages.get_container_id());
+
+}
+
+KillContainer::~KillContainer(){
+    
+}
+
+//end kill command

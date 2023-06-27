@@ -28,6 +28,13 @@ public:
     ContainerMeteData(const string& image_name,const string& create_time,
                      const string& container_id,const string& command,
                      const string& status,pid_t container_pid);
+
+    void change_status(const string& new_status);
+
+    pid_t get_pid();
+
+    string get_image_name();
+
     ~ContainerMeteData() = default;
 };
 
@@ -42,9 +49,14 @@ public:
                      const string& status,pid_t container_pid);
     ContainerDataMessage(const string& path);
     ~ContainerDataMessage();
+
+    void change_status(const string& new_status);
+    pid_t get_pid();
+    string get_container_id();
+    string get_image_name();
+
     void write_metedata();
     void print_metedate();
-    ContainerMeteData get_metedata();
 };
 
 #endif

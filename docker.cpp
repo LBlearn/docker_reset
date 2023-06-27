@@ -26,6 +26,18 @@ void Docker::init_docker(int argc, char **argv){
     else if(!command.compare("commit")){
         this->command_ptr = new CommitCommand();
     }
+    else if(!command.compare("stop")){
+        this->command_ptr = new StopContainer();
+    }
+    else if(!command.compare("start")){
+        this->command_ptr = new StartContainer();
+    }
+    else if(!command.compare("exec")){
+        this->command_ptr = new ExecContainer();
+    }
+    else if(!command.compare("kill")){
+        this->command_ptr = new KillContainer();
+    }
     else{
         this->command_ptr = new CommandInterface();
     }

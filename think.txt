@@ -1,0 +1,30 @@
+什么时候应该写容器元数据？？？
+	创建容器的时候可以获取image_name、create_time(now函数直接获取)、container_ID(这是随机出来的)、command可以从argc和argv获取，STATUS从命令获取(-t就是RT状态、-d就是R状态、stop是S状态、exec回到RT状态、start回到R状态)、pid可以通过函数进行获取
+
+什么时候删除容器元数据？？
+	容器有两种退出的情况，第一种-t命令exit退出，退出之后直接清理一堆东西；第二种kill的时候退出，此时从元数据文件解析拿到command，重新解析那一堆东西，再进行umount、delete_aufs、etc操作
+
+容器的状态转化，run命令中会蕴含两种状态-->R态和TR态
+	R态转化为TR态通过exec命令(通过继承接口实现)
+	R态转化为S态通过stop命令实现（通过信号机制实现，kill系统调用、SIGSTOP、元数据的联合使用）
+	S态转化为R太通过start命令实现（读取pid和发送SIGCONT信号）
+	所有态均可以转化成死亡容器，通过kill命令
+
+容器支持的命令目前有：
+	1.run（通过Namespace、Cgroup、AUFS三个Linux内核功能联合实现、volume的实现通过外部文件挂载到内部，可以进行容器之间的间接通信、容器和宿主机的通信）
+	2.images（通过读取/root/image && /root/image_tar目录实现）
+	3.containers（目前也是读目录实现、拟采用新的写元数据的方式实现）
+	4.commit（将容器打包成镜像，采用AUFS之后，改变的容器数据全部存放在mnt目录，将其cp到制定目录，或者打包到指定的目录即可）
+	5.stop（通过容器的ID暂停容器的运行，通过ID去/dockerHome/metedata读取元数据从而得到pid，结合信号机制实现）
+	6.start（类似于stop命令，通过kill(pid,SIGCONT)将容器进行继续启动）
+	7.exec（容器的ID可以定位到aufs目录下的挂载目录，通过run_namespace_sub的子函数可以重新启动bash，注意错误处理机制）
+	8.kill（容器的本质是一个运行的进程，对于一个-d选项进程，进行了一个死循环处理，在kill的时候可以通过get_opt子函数获取Cgroup限制内容、aufs挂载信息，然后进行处理）----考虑可不可以放在析构函数，kill的run接口只负责kill(pid,SIGKILL)信号的发送
+
+扩展：
+	1.JSON控制？？现在是用的一个hpp文件进行参数的设置，时间足够可以通过JSON控制
+	2.反射机制？？C++有没有类似于JAVA的反射机制，可以将command命令的判断脱离if-else
+	3.元数据存储机制，拟采用txt文件方式读写，是否可以结合MySQL数据库进行读写？次一点整成JSON或者XML文家
+	4.stop、start、kill的极度相似性，是否可以多继承机制（从来没用过）？
+	5.智能指针的使用，在一些命令里面采用了指针属性，将delete放在了析构函数中，但是不确定是否有内存泄漏的情况，指针指针？
+	6.deamon进程的运行？真正的docker架构是有一个deamon进程始终运行在后台的，所有的docker进程都只是一个子进程，采用了元数据的方式模拟，但管理始终差一点
+	7.网络进阶？涉及socket通信，需要虚拟IP地址、MAC地址等，手搓一个虚拟化网络不现实，调用github源码？类似于云课的做法？
