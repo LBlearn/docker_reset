@@ -76,6 +76,10 @@ ContainerDataMessage::~ContainerDataMessage(){
 }
 
 void ContainerDataMessage::write_metedata(){
+    string container_dir = "../dockerHome/metedata/container";
+    if(access(container_dir.c_str(),F_OK) != 0)
+        if(mkdir(container_dir.c_str(),0777) != 0)
+            print_error(__func__,MKDIR_ERROR);
     std::ofstream ofs;
     string path = CONTAINER_METEDATA_PATH+this->container_id + ".txt"; 
     // cout<<path<<endl;
