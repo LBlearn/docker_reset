@@ -34,3 +34,19 @@ sudo ./docker images
 ```shell
 sudo ./docker commit --name=test.tar -t Container_id
 ```
+5. 暂停容器的运行
+```shell
+sudo ./docker stop container_id
+```
+6. 继续容器的运行
+```shell
+sudo ./docker start container_id
+```
+7. 将容器运行到新的终端
+```shell
+sudo ./docker exec container_id shell_name
+```
+8. 杀死容器的
+```shell
+sudo ./docker kill container_id
+```
